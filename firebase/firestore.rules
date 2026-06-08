@@ -21,6 +21,7 @@ service cloud.firestore {
       return isSignedIn() 
         && (
           (request.auth.token.email == "brisasofc@gmail.com" && request.auth.token.email_verified == true)
+          || (request.auth.token.email == "wafortrh@gmail.com" && request.auth.token.email_verified == true)
           || request.auth.token.email == "wafort@wafort.com"
           || request.auth.token.email == "rh@wafort.com.br"
           || request.auth.token.email == "wendellatanazio@wafort.com.br"

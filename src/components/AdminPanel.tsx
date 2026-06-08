@@ -101,6 +101,7 @@ export default function AdminPanel() {
   // Logged-in admin email check from environment and instructions
   const ALLOWED_ADMIN_EMAIL = "brisasofc@gmail.com";
   const ALLOWED_CORP_EMAILS = ["wafort@wafort.com", "rh@wafort.com.br", "wendellatanazio@wafort.com.br"];
+  const ALLOWED_GMAIL_EMAILS = ["wafortrh@gmail.com"];
 
   // Track Firebase Auth state with Zero-Trust protection
   useEffect(() => {
@@ -111,9 +112,10 @@ export default function AdminPanel() {
         // Enforce verified status matching the firestore.rules checks:
         // (request.auth.token.email == "brisasofc@gmail.com" && request.auth.token.email_verified == true)
         const isVerifiedAdmin = user.email === ALLOWED_ADMIN_EMAIL && user.emailVerified === true;
+        const isGmailAdmin = ALLOWED_GMAIL_EMAILS.includes(user.email) && user.emailVerified === true;
         const isCorpAdmin = ALLOWED_CORP_EMAILS.includes(user.email);
         
-        if (!isVerifiedAdmin && !isCorpAdmin) {
+        if (!isVerifiedAdmin && !isGmailAdmin && !isCorpAdmin) {
           try {
             console.warn(`[Wafort Security] Tentativa de login negada para: ${user.email}. Desconectando sessão imediatamente.`);
             await logout();
@@ -148,7 +150,8 @@ export default function AdminPanel() {
   // Sync current feedbacks list in real-time when admin is logged in and fully authorized (Google + Credentials)
   useEffect(() => {
     const isFullyAuthorized = currentUser && (
-      (currentUser.email === ALLOWED_ADMIN_EMAIL && currentUser.emailVerified === true) || 
+      (currentUser.email === ALLOWED_ADMIN_EMAIL && currentUser.emailVerified === true) ||
+      (ALLOWED_GMAIL_EMAILS.includes(currentUser.email) && currentUser.emailVerified === true) ||
       ALLOWED_CORP_EMAILS.includes(currentUser.email)
     );
     if (!isFullyAuthorized) {
@@ -281,7 +284,8 @@ export default function AdminPanel() {
 
   // Computed visual properties
   const isFullyAuthorized = currentUser && (
-    (currentUser.email === ALLOWED_ADMIN_EMAIL && currentUser.emailVerified === true) || 
+    (currentUser.email === ALLOWED_ADMIN_EMAIL && currentUser.emailVerified === true) ||
+    (ALLOWED_GMAIL_EMAILS.includes(currentUser.email) && currentUser.emailVerified === true) ||
     ALLOWED_CORP_EMAILS.includes(currentUser.email)
   );
 
