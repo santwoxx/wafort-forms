@@ -15,13 +15,15 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    // Admin check: checks if user's verified email matches the Wafort Admin email or wafort@wafort.com corporate email.
-    // Admin users as configured: brisasofc@gmail.com & wafort@wafort.com
+    // Admin check: checks if user's verified email matches the Wafort Admin email or corporate emails.
+    // Admin users: brisasofc@gmail.com, wafort@wafort.com, rh@wafort.com.br, wendellatanazio@wafort.com.br
     function isAdmin() {
       return isSignedIn() 
         && (
           (request.auth.token.email == "brisasofc@gmail.com" && request.auth.token.email_verified == true)
           || request.auth.token.email == "wafort@wafort.com"
+          || request.auth.token.email == "rh@wafort.com.br"
+          || request.auth.token.email == "wendellatanazio@wafort.com.br"
         );
     }
 

@@ -100,7 +100,7 @@ export default function AdminPanel() {
 
   // Logged-in admin email check from environment and instructions
   const ALLOWED_ADMIN_EMAIL = "brisasofc@gmail.com";
-  const ALLOWED_CORP_EMAIL = "wafort@wafort.com";
+  const ALLOWED_CORP_EMAILS = ["wafort@wafort.com", "rh@wafort.com.br", "wendellatanazio@wafort.com.br"];
 
   // Track Firebase Auth state with Zero-Trust protection
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function AdminPanel() {
         // Enforce verified status matching the firestore.rules checks:
         // (request.auth.token.email == "brisasofc@gmail.com" && request.auth.token.email_verified == true)
         const isVerifiedAdmin = user.email === ALLOWED_ADMIN_EMAIL && user.emailVerified === true;
-        const isCorpAdmin = user.email === ALLOWED_CORP_EMAIL;
+        const isCorpAdmin = ALLOWED_CORP_EMAILS.includes(user.email);
         
         if (!isVerifiedAdmin && !isCorpAdmin) {
           try {
@@ -149,7 +149,7 @@ export default function AdminPanel() {
   useEffect(() => {
     const isFullyAuthorized = currentUser && (
       (currentUser.email === ALLOWED_ADMIN_EMAIL && currentUser.emailVerified === true) || 
-      currentUser.email === ALLOWED_CORP_EMAIL
+      ALLOWED_CORP_EMAILS.includes(currentUser.email)
     );
     if (!isFullyAuthorized) {
       setFeedbacks([]);
@@ -282,7 +282,7 @@ export default function AdminPanel() {
   // Computed visual properties
   const isFullyAuthorized = currentUser && (
     (currentUser.email === ALLOWED_ADMIN_EMAIL && currentUser.emailVerified === true) || 
-    currentUser.email === ALLOWED_CORP_EMAIL
+    ALLOWED_CORP_EMAILS.includes(currentUser.email)
   );
 
   // Counters Analytics
