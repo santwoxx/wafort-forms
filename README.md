@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Wafort Integridade — Canal de Transparência & Ética
 
-# Run and deploy your AI Studio app
+Sistema de Ouvidoria e Compliance para colaboradores da Wafort enviarem críticas, sugestões e denúncias anônimas em ambiente seguro.
 
-This contains everything you need to run your app locally.
+## Estrutura do Projeto
 
-View your app in AI Studio: https://ai.studio/apps/2a4b4685-0aaa-4eff-8e29-1b05c07524b9
+```
+/
+├── src/               # Frontend React + Vite + Tailwind (Vercel)
+├── backend/           # Backend Express + TypeScript (Render)
+├── firebase/          # Configurações e regras do Firebase
+│   ├── firestore.rules
+│   ├── firebase-blueprint.json
+│   └── metadata.json
+├── docs/              # Documentação
+│   ├── DEPLOYS.md
+│   └── security_spec.md
+├── index.html
+├── package.json
+├── vite.config.ts
+├── vercel.json
+└── tsconfig.json
+```
 
-## Run Locally
+## Deploy
 
-**Prerequisites:**  Node.js
+- **Frontend:** Vercel (raiz do projeto)
+- **Backend:** Render (pasta `backend/`)
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Consulte `docs/DEPLOYS.md` para instruções detalhadas.

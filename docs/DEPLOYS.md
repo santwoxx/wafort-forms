@@ -68,7 +68,7 @@ O backend é um servidor robusto em **Node.js** + **Express** configurado em Typ
 ## 🔒 Segurança do Firebase no Client-Side
 O **Firebase** foi construído e arquitetado pelo Google para ser integrado **diretamente no client-side de forma totalmente segura**. Não há perigo de expor a `apiKey` ou `appId` de seu Firebase no navegador, pois o Firebase protege a infraestrutura através de **Firestore Security Rules (Regras de Segurança)**.
 
-Nossos dados de Ouvidoria estão fortificados pelas regras contidas no arquivo `firestore.rules` que você deve carregar no console do seu Firebase:
+Nossos dados de Ouvidoria estão fortificados pelas regras contidas no arquivo `firebase/firestore.rules` que você deve carregar no console do seu Firebase:
 
 - **Denúncias Anônimas** só podem ser escritas (`create`). É impossível listar, ler ou modificar outros registros sem autorização devida.
 - **Consultas de Rastreamento (`get`)** só permitem visualizar a denúncia específica se possuir o token de ID correspondente (ID de documento randômico e imprevisível de 20 caracteres).
