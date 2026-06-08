@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db, auth } from "./firebase";
 import Navbar, { AppView } from "./components/Navbar";
@@ -9,10 +9,46 @@ import FormSuccess from "./components/FormSuccess";
 import ModalPolicies from "./components/ModalPolicies";
 import { Info, Star, ShieldCheck } from "lucide-react";
 
+function playNotificationSound() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const audioCtx = new AudioContextClass();
+
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+    gain1.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start();
+    osc1.stop(audioCtx.currentTime + 0.35);
+
+    setTimeout(() => {
+      try {
+        if (audioCtx.state === "closed") return;
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(698.46, audioCtx.currentTime);
+        gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start();
+        osc2.stop(audioCtx.currentTime + 0.45);
+      } catch { /* ignore */ }
+    }, 180);
+  } catch { /* ignore */ }
+}
+
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>(AppView.FORM);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  
+  const prevUnread = useRef(0);
+
   // Policies and terms modal state
   const [policiesModalOpen, setPoliciesModalOpen] = useState(false);
   const [policiesTab, setPoliciesTab] = useState<"terms" | "privacy" | "compliance">("terms");
@@ -30,22 +66,27 @@ export default function App() {
     let unsub: (() => void) | null = null;
 
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      // Unsubscribe previous listener if any
       if (unsub) unsub();
 
       if (!user) {
         setUnreadCount(0);
+        prevUnread.current = 0;
         return;
       }
 
       const q = query(collection(db, "feedbacks"), where("isRead", "==", false));
-      unsub = onSnapshot(
-        q,
+      unsub = onSnapshot(q,
         (snapshot) => {
-          setUnreadCount(snapshot.size);
+          const count = snapshot.size;
+          if (count > prevUnread.current) {
+            playNotificationSound();
+          }
+          prevUnread.current = count;
+          setUnreadCount(count);
         },
         () => {
           setUnreadCount(0);
+          prevUnread.current = 0;
         }
       );
     });

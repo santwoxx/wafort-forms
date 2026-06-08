@@ -96,6 +96,9 @@ export default function AdminPanel() {
   const [updatingItem, setUpdatingItem] = useState(false);
   const [adminActionMsg, setAdminActionMsg] = useState<string | null>(null);
 
+  // Delete confirmation modal state
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Logged-in admin email check from environment and instructions
@@ -270,15 +273,15 @@ export default function AdminPanel() {
   };
 
   // Delete Action (Admin Only)
-  const handleDeleteFeedback = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir permanentemente esta ocorrência da base? Esta ação é irreversível.")) {
-      return;
-    }
+  const confirmDeleteFeedback = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteDoc(doc(db, "feedbacks", id));
+      await deleteDoc(doc(db, "feedbacks", deleteTarget));
       setSelectedItem(null);
+      setDeleteTarget(null);
     } catch (err) {
       alert("Falha ao excluir o documento.");
+      setDeleteTarget(null);
     }
   };
 
@@ -682,7 +685,7 @@ export default function AdminPanel() {
                   </div>
                   <button
                     id="admin-delete-confirm-btn"
-                    onClick={() => handleDeleteFeedback(selectedItem.id)}
+                    onClick={() => setDeleteTarget(selectedItem.id)}
                     className="p-2 text-slate-400 hover:text-red-700 hover:bg-slate-100 rounded-sm transition"
                     title="Excluir Ocorrência permanentemente"
                   >
@@ -870,6 +873,42 @@ export default function AdminPanel() {
           );
         })}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-sm border border-slate-200 w-full max-w-md shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="bg-red-600 text-white px-6 py-4 border-b-4 border-red-800">
+              <h3 className="font-display font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Confirmar Exclusão
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-700 leading-relaxed">
+                Tem certeza que deseja excluir permanentemente esta ocorrência da base?
+                <strong className="block mt-2 text-red-700">Esta ação é irreversível.</strong>
+              </p>
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(null)}
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteFeedback}
+                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-sm transition cursor-pointer"
+                >
+                  Sim, Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
