@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default Deny All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable, hardened global validation helpers
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Admin check: checks if user's verified email matches the Wafort Admin email or wafort@wafort.com corporate email.
+    // Admin users as configured: brisasofc@gmail.com & wafort@wafort.com
+    function isAdmin() {
+      return isSignedIn() 
+        && (
+          (request.auth.token.email == "brisasofc@gmail.com" && request.auth.token.email_verified == true)
+          || request.auth.token.email == "wafort@wafort.com"
+        );
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidFeedback(data) {
+      return data.trackingCode is string && data.trackingCode.size() <= 50
+        && data.type is string && (data.type == 'sugestao' || data.type == 'critica' || data.type == 'denuncia')
+        && data.category is string && data.category.size() <= 100
+        && data.subject is string && data.subject.size() <= 200
+        && data.description is string && data.description.size() <= 10000
+        && data.isAnonymous is bool
+        && (data.collaboratorName == null || (data.collaboratorName is string && data.collaboratorName.size() <= 200))
+        && (data.collaboratorEmail == null || (data.collaboratorEmail is string && data.collaboratorEmail.size() <= 200))
+        && data.status is string && (data.status == 'pendente' || data.status == 'em_analise' || data.status == 'resolvido' || data.status == 'arquivado')
+        && data.urgency is string && (data.urgency == 'baixa' || data.urgency == 'media' || data.urgency == 'alta' || data.urgency == 'critica')
+        && (data.adminNotes == null || (data.adminNotes is string && data.adminNotes.size() <= 10000))
+        && (data.adminResponse == null || (data.adminResponse is string && data.adminResponse.size() <= 10000))
+        && data.isRead is bool;
+    }
+
+    // Match block for Wafort feedbacks and whistleblowing collection
+    match /feedbacks/{feedbackId} {
+      // Allow individual retrieval if the user has the exact ID (which acts as an access token) or if they are admin.
+      allow get: if isValidId(feedbackId) && (resource != null || isAdmin());
+      
+      // Only authorized admins can perform queries and list-fetches of all submissions.
+      allow list: if isAdmin();
+      
+      // Enable secure anonymous creation
+      allow create: if isValidId(feedbackId) 
+        && isValidFeedback(incoming())
+        && incoming().createdAt == request.time
+        && incoming().status == 'pendente'
+        && incoming().isRead == false
+        && incoming().adminNotes == null
+        && incoming().adminResponse == null;
+        
+      // Only the admin can update (e.g. state management or responses)
+      allow update: if isAdmin() 
+        && isValidId(feedbackId)
+        && isValidFeedback(incoming())
+        && incoming().createdAt == existing().createdAt;
+        
+      // Only admin can hard delete / archive
+      allow delete: if isAdmin() && isValidId(feedbackId);
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "Feedback": {
+      "title": "Feedback",
+      "description": "Feedbacks, suggestions and complaints from Wafort collaborators",
+      "type": "object",
+      "properties": {
+        "trackingCode": {
+          "type": "string",
+          "description": "Easy-to-read custom tracking code, e.g. WF-123456"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["sugestao", "critica", "denuncia"]
+        },
+        "category": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isAnonymous": {
+          "type": "boolean"
+        },
+        "collaboratorName": {
+          "type": "string"
+        },
+        "collaboratorEmail": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pendente", "em_analise", "resolvido", "arquivado"]
+        },
+        "urgency": {
+          "type": "string",
+          "enum": ["baixa", "media", "alta", "critica"]
+        },
+        "adminNotes": {
+          "type": "string"
+        },
+        "adminResponse": {
+          "type": "string"
+        },
+        "adminResponseAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "isRead": {
+          "type": "boolean"
+        }
+      },
+      "required": ["trackingCode", "type", "category", "subject", "description", "isAnonymous", "createdAt", "status", "urgency", "isRead"]
+    }
+  },
+  "firestore": {
+    "feedbacks/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "Form submissions representing critiques, suggestions or complaints"
+    }
+  }
+}

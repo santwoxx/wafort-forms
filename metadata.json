@@ -1,0 +1,6 @@
+{
+  "name": "Wafort Forms",
+  "description": "Sistema de Ouvidoria e Compliance Integrado da Wafort para críticas, sugestões e denúncias anônimas em ambiente seguro, intuitivo e em conformidade estrita.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
